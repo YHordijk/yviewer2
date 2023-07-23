@@ -9,6 +9,7 @@ class MainLoop:
             'iteration': 0,
             'time': 0,
             'delta_time': 0,
+            'fps': 0,
         })
         self.settings = dictfunc.DotDict({
             'fps': 60
@@ -29,6 +30,7 @@ class MainLoop:
         dt = self.clock.tick_busy_loop(self.settings.fps) / 1000
         self.state.delta_time = dt
         self.state.time += dt
+        self.state.fps = 1/dt
 
         return not self.should_exit()
 
