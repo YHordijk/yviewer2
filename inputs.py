@@ -73,6 +73,8 @@ class Mouse:
     def update(self):
         self.dx = 0
         self.dy = 0
+        self.scrollup = False
+        self.scrolldown = False
 
         for button in self.buttons:
             if button.up:
@@ -88,17 +90,27 @@ class Mouse:
             self.dx, self.dy = event.rel
             
         for event in pg.event.get(1025):
-            self.buttons[event.button - 1].hold = False
-            self.buttons[event.button - 1].down = True
-            self.buttons[event.button - 1].up = False
+            btn = event.button
+            if btn == 4:
+                self.scrollup = True
+                continue
+            if btn == 5:
+                self.scrolldown = True
+                continue
+            self.buttons[btn - 1].hold = False
+            self.buttons[btn - 1].down = True
+            self.buttons[btn - 1].up = False
 
         for event in pg.event.get(1026):
-            self.buttons[event.button - 1].hold = False
-            self.buttons[event.button - 1].down = False
-            self.buttons[event.button - 1].up = True
+            btn = event.button
+            if btn in [4, 5]:
+                continue
+            self.buttons[btn - 1].hold = False
+            self.buttons[btn - 1].down = False
+            self.buttons[btn - 1].up = True
 
     def __getattr__(self, key):
-        code = ['left', 'middle', 'righy'].index(key)
+        code = ['left', 'middle', 'right', 'scrollup', 'scrolldown'].index(key)
         return self.buttons[code]
 
     @property
