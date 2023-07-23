@@ -1,6 +1,7 @@
 import pygame as pg
 from yutility import dictfunc, geometry
 import numpy as np
+import itertools
 
 
 class Screen:
@@ -29,13 +30,12 @@ class Screen:
     def draw_pixels(self, poss, colors=None):
         poss = self.project(poss).astype(int)
         colors = colors if colors is not None else [(255, 255, 255)] * len(poss)
-        # for pos, color in zip(poss, colors):
-        #     print(pos)
-        #     self.draw_surf.set_at([int(pos[0]), int(pos[1])], color)
+       
         pixels = pg.surfarray.pixels3d(self.draw_surf)
-        pixels[poss[:,0], poss[:,1], :] = colors.T
-        del pixels
+        for offsetx, offsety in itertools.product([-1, 1], [-1, 1]):
+            pixels[np.clip(poss[:, 0]+offsetx, 0, self.settings.size[0]-1), np.clip(poss[:, 1]+offsety, 0, self.settings.size[1]-1), :] = colors.T
 
+        del pixels
 
     def clear(self, color=None):
         color = color or self.settings.background_color
@@ -66,7 +66,6 @@ class Screen:
             R = geometry.get_rotation_matrix(*self.settings.camera_rot).T
             x = poss - self.settings.camera_pos
 
-            # print(x.shape, R.shape)
             d = R @ x.T
             e = self.settings.camera_plane_pos
             P = np.array([[1, 0, e[0] / e[2]], [0, 1, e[1] / e[2]], [0, 0, 1 / e[2]]])
@@ -74,5 +73,5 @@ class Screen:
             f = P @ d
             return np.vstack((f[0] / f[2], f[1] / f[2])).T
 
-
-
+    def distance_to_camera(self, poss):
+        return np.linalg.norm(poss - self.settings.camera_pos, axis=1)
