@@ -1,7 +1,11 @@
 import pygame as pg
-from yutility import dictfunc, geometry
+from yutility import dictfunc, geometry, ensure_list
 import numpy as np
 import itertools
+import cv2
+from skimage import draw
+
+
 
 
 class Screen:
@@ -27,13 +31,41 @@ class Screen:
         self.settings.camera_plane_pos = (width/2, height/2, 600)
         self.initialize()
 
-    def draw_pixels(self, poss, colors=None):
+    def draw_pixels(self, poss, colors=None, pixel_offsets=None):
         poss = self.project(poss).astype(int)
         colors = colors if colors is not None else [(255, 255, 255)] * len(poss)
+
+        pixel_offsets = pixel_offsets or [(0, 0)]
        
         pixels = pg.surfarray.pixels3d(self.draw_surf)
-        for offsetx, offsety in itertools.product([-1, 1], [-1, 1]):
+        for (offsetx, offsety) in pixel_offsets:
             pixels[np.clip(poss[:, 0]+offsetx, 0, self.settings.size[0]-1), np.clip(poss[:, 1]+offsety, 0, self.settings.size[1]-1), :] = colors.T
+
+        del pixels
+
+    def draw_circles(self, poss, radii=1, colors=None, filled=True):
+        poss_proj = self.project(poss).astype(int)
+        colors = colors if colors is not None else np.array([(255, 255, 255)] * len(poss)).T
+        pixels = pg.surfarray.pixels3d(self.draw_surf)
+
+        radii = ensure_list(radii)
+        if len(radii) == 1:
+            radii = radii * len(poss)
+
+        radii = self.project(np.array(poss) + np.vstack([np.zeros_like(radii), np.zeros_like(radii), np.array(radii)]).T) - poss_proj
+        radii = np.linalg.norm(radii, axis=1)
+        print(radii)
+
+        if filled:
+            for pos, color, radius in zip(poss_proj, colors, radii):
+                # rr, cc = draw.disk((radius, radius), radius=radius, shape=(radius*2, radius*2))
+                # pixels[rr + pos[0], cc + pos[1]] = color
+                rr, cc = draw.circle(*pos, radius=radius, shape=pixels.shape)
+                pixels[rr, cc] = color
+        else:
+            for pos, color, radius in zip(poss_proj, colors, radii):
+                rr, cc, val = draw.circle_perimeter_aa(*pos, radius=radius, shape=pixels.shape)
+                pixels[rr, cc] = color * val.reshape(-1, 1)
 
         del pixels
 
