@@ -175,8 +175,7 @@ class STO:
                 return 3/16 * sqrt(35/pi) * (x**2 * (x**2 - 3*y**2) - y**2 * (3*x**2 - y**2))/r**4
 
 
-
-orb = STO(n=4, l=4, ml=2)
+orb = STO(n=3, l=3, ml=-2)
 
 rot = (0, 0)
 rotation = (0, 0)
@@ -184,7 +183,7 @@ zoom = 0
 while loop.runs():
     t = loop.state.time/2
 
-    points = geometry.random_point_on_sphere(5*np.sin(t), N=50_000)
+    points = geometry.random_point_on_sphere(5, N=50_000)
     wfs = orb(points).reshape(-1, 1)
     RED = np.array([255, 0, 0])
     BLUE = np.array([255, 255, 255])
@@ -195,19 +194,23 @@ while loop.runs():
     rotation = rotation[0] + rot[0], rotation[1] + rot[1]
     zoom = zoom*.75
     if yviewer2.inputs.mouse.left.hold:
+        screen.clear()
         rot = (-yviewer2.inputs.mouse.dy/600, yviewer2.inputs.mouse.dx/600)
     if yviewer2.inputs.mouse.scrollup:
+        screen.clear()
         zoom = -.25
     if yviewer2.inputs.mouse.scrolldown:
+        screen.clear()
         zoom = .25
 
     screen.settings.camera_pos[2] += zoom
     R = geometry.get_rotation_matrix(x=rotation[0], y=rotation[1])
     points = points @ R
 
-    screen.clear()
     # idxs = np.argsort(screen.distance_to_camera(points))
     # screen.draw_pixels(points[idxs], colors[idxs].T)
+    # screen.draw_circles(points, 1, colors=colors)
 
     screen.draw_pixels(points, colors.T)
+    screen.draw_axes()
     screen.update()
