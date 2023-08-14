@@ -1,4 +1,5 @@
 import pygame as pg
+import pygame.locals as pg_locals
 
 
 def update():
@@ -41,10 +42,10 @@ class Keys:
                 key.hold = True
 
         # events: keydown 769, keyup 768, textinput 771
-        for event in pg.event.get(768):
+        for event in pg.event.get(pg_locals.KEYDOWN):
             self.keys[event.key] = Key(event.key, False, True, False)
 
-        for event in pg.event.get(769):
+        for event in pg.event.get(pg_locals.KEYUP):
             self.keys[event.key].hold = False
             self.keys[event.key].down = False
             self.keys[event.key].up = True
@@ -75,6 +76,8 @@ class Mouse:
         self.dy = 0
         self.scrollup = False
         self.scrolldown = False
+        self.scrollright = False
+        self.scrollleft = False
 
         for button in self.buttons:
             if button.up:
@@ -97,13 +100,21 @@ class Mouse:
             if btn == 5:
                 self.scrolldown = True
                 continue
+            if btn == 6:
+                self.scrollright = True
+                continue
+            if btn == 7:
+                self.scrollleft = True
+                continue
+            if btn > 7:
+                continue
             self.buttons[btn - 1].hold = False
             self.buttons[btn - 1].down = True
             self.buttons[btn - 1].up = False
 
         for event in pg.event.get(1026):
             btn = event.button
-            if btn in [4, 5]:
+            if btn >= 4:
                 continue
             self.buttons[btn - 1].hold = False
             self.buttons[btn - 1].down = False
