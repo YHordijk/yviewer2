@@ -7,7 +7,6 @@ from skimage import draw
 
 
 
-
 class Screen:
     def __init__(self):
         self.state = dictfunc.DotDict({
@@ -54,7 +53,6 @@ class Screen:
 
         radii = self.project(np.array(poss) + np.vstack([np.zeros_like(radii), np.zeros_like(radii), np.array(radii)]).T) - poss_proj
         radii = np.linalg.norm(radii, axis=1)
-        print(radii)
 
         if filled:
             for pos, color, radius in zip(poss_proj, colors, radii):
@@ -68,6 +66,18 @@ class Screen:
                 pixels[rr, cc] = color * val.reshape(-1, 1)
 
         del pixels
+
+    def draw_line(self, start, end, color=None, width=1):
+        color = color if color is not None else (255, 255, 255)
+        start_ = self.project(start).astype(int)
+        end_ = self.project(end).astype(int)
+        pg.draw.line(self.draw_surf, color, start_, end_, width=width)
+
+    def draw_axes(self, length=1):
+        self.draw_line([0, 0, 0], [1, 0, 0], [255, 0, 0])
+        self.draw_line([0, 0, 0], [0, 1, 0], [0, 255, 0])
+        self.draw_line([0, 0, 0], [0, 0, 1], [0, 0, 255])
+
 
     def clear(self, color=None):
         color = color or self.settings.background_color
@@ -103,7 +113,7 @@ class Screen:
             P = np.array([[1, 0, e[0] / e[2]], [0, 1, e[1] / e[2]], [0, 0, 1 / e[2]]])
 
             f = P @ d
-            return np.vstack((f[0] / f[2], f[1] / f[2])).T
+            return np.squeeze(np.vstack((f[0] / f[2], f[1] / f[2])).T)
 
     def distance_to_camera(self, poss):
         return np.linalg.norm(poss - self.settings.camera_pos, axis=1)
