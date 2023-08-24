@@ -6,7 +6,6 @@ import cv2
 from skimage import draw
 
 
-
 class Screen:
     def __init__(self):
         self.state = dictfunc.DotDict({
@@ -19,6 +18,9 @@ class Screen:
             'camera_rot': (0, 0, 0),
             'camera_plane_pos': (200, 200, 600),
             'background_color': (0, 0, 0),
+            'space_type_2d': 'pixel',
+            'extent_min_2d': (0, 1),
+            'extent_max_2d': (0, 1),
         })
         self.initialize()
 
@@ -30,15 +32,22 @@ class Screen:
         self.settings.camera_plane_pos = (width/2, height/2, 600)
         self.initialize()
 
+    def draw_matrix(self, matrix, color=[255, 255, 255]):
+        pixels = pg.surfarray.pixels3d(self.draw_surf)
+        pixels[:, :, 0] = color[0] * matrix
+        pixels[:, :, 1] = color[1] * matrix
+        pixels[:, :, 2] = color[2] * matrix
+        del pixels
+
     def draw_pixels(self, poss, colors=None, pixel_offsets=None):
         poss = self.project(poss).astype(int)
-        colors = colors if colors is not None else [(255, 255, 255)] * len(poss)
+        colors = colors if colors is not None else np.array([(255, 255, 255)] * len(poss))
 
         pixel_offsets = pixel_offsets or [(0, 0)]
-       
+
         pixels = pg.surfarray.pixels3d(self.draw_surf)
         for (offsetx, offsety) in pixel_offsets:
-            pixels[np.clip(poss[:, 0]+offsetx, 0, self.settings.size[0]-1), np.clip(poss[:, 1]+offsety, 0, self.settings.size[1]-1), :] = colors.T
+            pixels[np.clip(poss[:, 0]+offsetx, 0, self.settings.size[0]-1), np.clip(poss[:, 1]+offsety, 0, self.settings.size[1]-1), :] = colors
 
         del pixels
 
@@ -78,7 +87,6 @@ class Screen:
         self.draw_line([0, 0, 0], [0, 1, 0], [0, 255, 0])
         self.draw_line([0, 0, 0], [0, 0, 1], [0, 0, 255])
 
-
     def clear(self, color=None):
         color = color or self.settings.background_color
         self.draw_surf.fill(color)
@@ -102,7 +110,10 @@ class Screen:
         poss = np.atleast_2d(poss)
 
         if not self.settings.use_3d:
-            return poss
+            if self.settings.space_type_2d == 'pixel':
+                return poss
+            elif self.settings.space_type_2d == 'extent':
+                return (poss - np.array(self.settings.extent_min_2d)) / (np.array(self.settings.extent_max_2d) - np.array(self.settings.extent_min_2d))
 
         if self.settings.mode_3d == 'perspective':
             R = geometry.get_rotation_matrix(*self.settings.camera_rot).T
