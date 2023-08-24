@@ -44,22 +44,24 @@ while loop.runs():
     pheromones[ant_pos.astype(int)[:, 0], ant_pos.astype(int)[:, 1]] += 1
     screen.draw_pixels(ant_pos, cols)
 
-    direc = np.hstack((np.cos(ant2_ang), np.sin(ant2_ang)))
-    ant2_pos += direc * loop.state.delta_time * 150
+    if yviewer2.inputs.keys.space:
+        pheromones = np.zeros(screen.settings.size)
+    # direc = np.hstack((np.cos(ant2_ang), np.sin(ant2_ang)))
+    # ant2_pos += direc * loop.state.delta_time * 150
 
-    antenna1 = np.mod(ant2_pos + np.hstack((np.cos(ant2_ang+antenna_angle), np.sin(ant2_ang+.4)))*antenna_length, screen.settings.size)
-    antenna2 = np.mod(ant2_pos + np.hstack((np.cos(ant2_ang-antenna_angle), np.sin(ant2_ang-.4)))*antenna_length, screen.settings.size)
-    antenna1_pheromones = pheromones[antenna1.astype(int)[:, 0], antenna1.astype(int)[:, 1]]
-    antenna2_pheromones = pheromones[antenna2.astype(int)[:, 0], antenna2.astype(int)[:, 1]]
+    # antenna1 = np.mod(ant2_pos + np.hstack((np.cos(ant2_ang+antenna_angle), np.sin(ant2_ang+.4)))*antenna_length, screen.settings.size)
+    # antenna2 = np.mod(ant2_pos + np.hstack((np.cos(ant2_ang-antenna_angle), np.sin(ant2_ang-.4)))*antenna_length, screen.settings.size)
+    # antenna1_pheromones = pheromones[antenna1.astype(int)[:, 0], antenna1.astype(int)[:, 1]]
+    # antenna2_pheromones = pheromones[antenna2.astype(int)[:, 0], antenna2.astype(int)[:, 1]]
 
-    ant2_ang += 4*turning_speed*(2*np.random.rand(Nants, 1) - 1) * loop.state.delta_time
-    ant2_ang[antenna1_pheromones > antenna2_pheromones] -= turning_speed * loop.state.delta_time/2
-    ant2_ang[antenna1_pheromones < antenna2_pheromones] += turning_speed * loop.state.delta_time/2
+    # ant2_ang += 4*turning_speed*(2*np.random.rand(Nants, 1) - 1) * loop.state.delta_time
+    # ant2_ang[antenna1_pheromones > antenna2_pheromones] -= turning_speed * loop.state.delta_time/2
+    # ant2_ang[antenna1_pheromones < antenna2_pheromones] += turning_speed * loop.state.delta_time/2
 
-    ant2_pos = np.mod(ant2_pos, screen.settings.size)
-    pheromones = pheromones * .99
-    pheromones[ant2_pos.astype(int)[:, 0], ant2_pos.astype(int)[:, 1]] -= 1
-    screen.draw_pixels(ant2_pos, cols2)
+    # ant2_pos = np.mod(ant2_pos, screen.settings.size)
+    # pheromones = pheromones * .99
+    # pheromones[ant2_pos.astype(int)[:, 0], ant2_pos.astype(int)[:, 1]] -= 1
+    # screen.draw_pixels(ant2_pos, cols2)
 
     # screen.draw_matrix(pheromones/pheromones.max())
     # screen.draw_pixels(ant_pos, cols)
