@@ -12,7 +12,7 @@ class MainLoop:
             'fps': 0,
         })
         self.settings = dictfunc.DotDict({
-            'fps': 60
+            'fps': 0
         })
         self.clock = pg.time.Clock()
 
