@@ -60,8 +60,8 @@ class Screen:
         if len(radii) == 1:
             radii = radii * len(poss)
 
-        radii = self.project(np.array(poss) + np.vstack([np.zeros_like(radii), np.zeros_like(radii), np.array(radii)]).T) - poss_proj
-        radii = np.linalg.norm(radii, axis=1)
+        radii = self.project(np.array(poss) + np.vstack([np.array(radii), np.array(radii), np.array(radii)]).T) - poss_proj
+        radii = np.linalg.norm(radii, axis=1).astype(int)
 
         if filled:
             for pos, color, radius in zip(poss_proj, colors, radii):
